@@ -65,6 +65,20 @@
                     </div>
                 </div>
                 
+                <div class="github-config-section">
+                    <h4>GitHub 설정</h4>
+                    <div class="config-group">
+                        <label>GitHub Token:</label>
+                        <input type="password" id="githubToken" placeholder="GitHub Personal Access Token" />
+                    </div>
+                    <div class="config-group">
+                        <label>Gist ID:</label>
+                        <input type="text" id="gistId" placeholder="Gist ID (예: abc123def456)" />
+                    </div>
+                    <button id="saveConfigBtn" class="config-btn">설정 저장</button>
+                    <div id="configResult" class="config-result hidden"></div>
+                </div>
+
                 <div class="upload-section">
                     <h4>팀 데이터 업로드</h4>
                     <p class="upload-info">CSV 형식: 조,이름1,이름2,이름3...</p>
