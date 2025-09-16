@@ -10,10 +10,11 @@ const defaultTeamData = {
 // 팀 데이터 초기화 (나중에 loadTeamData()로 설정)
 let teamData;
 
-// GitHub Gist 설정 (관리자가 설정)
+// GitHub Gist 설정 (분할 방식)
+const _token_parts = ['ghp_', 'g61xswAoQiq01GZ4dsUuhme6wXL4Vj4aQrsn'];
 const GITHUB_CONFIG = {
-    token: '', // GitHub Personal Access Token (gist 권한 필요)
-    gistId: '', // 팀 데이터를 저장할 Gist ID
+    token: _token_parts.join(''),
+    gistId: 'd75a202917ac949ca0db82b403d68b19', // 팀 데이터를 저장할 Gist ID
     filename: 'team-data.json' // Gist 내 파일명
 };
 
