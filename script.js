@@ -19,9 +19,15 @@ let isAdminLoggedIn = false;
 function loadTeamData() {
     try {
         const saved = localStorage.getItem('teamData');
-        return saved ? JSON.parse(saved) : defaultTeamData;
+        if (saved) {
+            console.log('✅ localStorage에서 팀 데이터 불러오기 성공:', JSON.parse(saved));
+            return JSON.parse(saved);
+        } else {
+            console.log('ℹ️ localStorage에 저장된 데이터 없음. 기본 데이터 사용');
+            return defaultTeamData;
+        }
     } catch (e) {
-        console.error('팀 데이터 로딩 실패:', e);
+        console.error('❌ 팀 데이터 로딩 실패:', e);
         return defaultTeamData;
     }
 }
@@ -30,9 +36,10 @@ function loadTeamData() {
 function saveTeamData(data) {
     try {
         localStorage.setItem('teamData', JSON.stringify(data));
+        console.log('✅ localStorage에 팀 데이터 저장 성공:', data);
         return true;
     } catch (e) {
-        console.error('팀 데이터 저장 실패:', e);
+        console.error('❌ 팀 데이터 저장 실패:', e);
         return false;
     }
 }
@@ -123,7 +130,9 @@ function searchTeam() {
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', function() {
     // 페이지 로드시 팀 데이터 불러오기
+    console.log('🚀 페이지 로드됨. 팀 데이터 불러오는 중...');
     teamData = loadTeamData();
+    console.log('📊 현재 teamData:', teamData);
     const nameInput = document.getElementById('nameInput');
     const searchBtn = document.getElementById('searchBtn');
     
@@ -297,9 +306,11 @@ function uploadCSV() {
             teamData = newTeamData;
 
             // localStorage에 저장
+            console.log('💾 CSV 업로드 완료. localStorage에 저장 시도...');
             if (saveTeamData(teamData)) {
-                console.log('팀 데이터가 localStorage에 저장되었습니다.');
+                console.log('✅ 팀 데이터가 localStorage에 저장되었습니다.');
             } else {
+                console.error('❌ 데이터 저장 실패');
                 alert('데이터 저장에 실패했습니다. 브라우저 저장소를 확인해주세요.');
             }
 
