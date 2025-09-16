@@ -259,10 +259,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('adminLogoutBtn').addEventListener('click', hideAdminPanel);
     document.getElementById('uploadBtn').addEventListener('click', uploadCSV);
     document.getElementById('downloadTemplateBtn').addEventListener('click', downloadCSVTemplate);
-    document.getElementById('saveConfigBtn').addEventListener('click', saveGitHubConfig);
-
-    // GitHub 설정 불러오기
-    loadGitHubConfig();
     
     // 관리자 비밀번호 입력시 엔터키
     document.getElementById('adminPassword').addEventListener('keypress', function(e) {
@@ -500,82 +496,6 @@ function downloadCSVTemplate() {
     URL.revokeObjectURL(url);
 }
 
-// GitHub 설정 관리
-function loadGitHubConfig() {
-    try {
-        const config = localStorage.getItem('github_config');
-        if (config) {
-            const parsed = JSON.parse(config);
-            GITHUB_CONFIG.token = parsed.token || '';
-            GITHUB_CONFIG.gistId = parsed.gistId || '';
-
-            // UI에 설정값 표시 (token은 마스킹)
-            document.getElementById('githubToken').value = parsed.token ? '••••••••••••••••' : '';
-            document.getElementById('gistId').value = parsed.gistId || '';
-
-            console.log('✅ GitHub 설정 로드됨:', {
-                hasToken: !!parsed.token,
-                gistId: parsed.gistId
-            });
-        }
-    } catch (e) {
-        console.error('❌ GitHub 설정 로드 실패:', e);
-    }
-}
-
-function saveGitHubConfig() {
-    const tokenInput = document.getElementById('githubToken');
-    const gistIdInput = document.getElementById('gistId');
-    const configResult = document.getElementById('configResult');
-
-    const token = tokenInput.value.trim();
-    const gistId = gistIdInput.value.trim();
-
-    // 마스킹된 값이 아닌 경우에만 업데이트
-    if (token && token !== '••••••••••••••••') {
-        GITHUB_CONFIG.token = token;
-    }
-
-    if (gistId) {
-        GITHUB_CONFIG.gistId = gistId;
-    }
-
-    try {
-        const config = {
-            token: GITHUB_CONFIG.token,
-            gistId: GITHUB_CONFIG.gistId
-        };
-
-        localStorage.setItem('github_config', JSON.stringify(config));
-
-        // UI에 마스킹된 token 표시
-        if (token && token !== '••••••••••••••••') {
-            tokenInput.value = '••••••••••••••••';
-        }
-
-        showConfigResult('✅ GitHub 설정이 저장되었습니다.', true);
-        console.log('✅ GitHub 설정 저장됨:', {
-            hasToken: !!GITHUB_CONFIG.token,
-            gistId: GITHUB_CONFIG.gistId
-        });
-
-    } catch (e) {
-        console.error('❌ GitHub 설정 저장 실패:', e);
-        showConfigResult('❌ 설정 저장에 실패했습니다.', false);
-    }
-}
-
-function showConfigResult(message, isSuccess) {
-    const configResult = document.getElementById('configResult');
-    configResult.textContent = message;
-    configResult.className = 'config-result ' + (isSuccess ? 'success' : 'error');
-    configResult.classList.remove('hidden');
-
-    // 3초 후 결과 메시지 숨기기
-    setTimeout(() => {
-        configResult.classList.add('hidden');
-    }, 3000);
-}
 
 // 페이지 로드시 URL 파라미터에서 이름 확인 (QR 코드에서 리다이렉트된 경우)
 window.addEventListener('load', function() {
