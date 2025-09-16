@@ -32,12 +32,7 @@ async function loadTeamDataFromGist() {
 
     try {
         console.log('🌐 GitHub Gist에서 팀 데이터 불러오는 중...');
-        const response = await fetch(`https://api.github.com/gists/${GITHUB_CONFIG.gistId}?t=${Date.now()}`, {
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            }
-        });
+        const response = await fetch(`https://api.github.com/gists/${GITHUB_CONFIG.gistId}?t=${Date.now()}`);
 
         console.log('📡 GitHub API 응답 상태:', response.status);
         if (!response.ok) {
