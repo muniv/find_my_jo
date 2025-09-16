@@ -10,39 +10,83 @@ const defaultTeamData = {
 // 팀 데이터 초기화 (나중에 loadTeamData()로 설정)
 let teamData;
 
-// GitHub Gist 설정 (분할 방식)
-const _token_parts = ['ghp_', '9Plc0OuhYKi265rOD7hHhZ6XJ9Uezo2RbuqF'];
-const GITHUB_CONFIG = {
-    token: _token_parts.join(''),
-    gistId: 'd75a202917ac949ca0db82b403d68b19', // 팀 데이터를 저장할 Gist ID
-    filename: 'team-data.json' // Gist 내 파일명
+// Firebase 설정 (무료 실시간 데이터베이스)
+const firebaseConfig = {
+    apiKey: "AIzaSyCqOvWv4bSJoQTWN0x8gkq6z5JH4K2vP9w",
+    authDomain: "team-finder-db.firebaseapp.com",
+    databaseURL: "https://team-finder-db-default-rtdb.firebaseio.com",
+    projectId: "team-finder-db"
 };
+
+// Firebase 초기화
+let database;
+try {
+    firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    console.log('🔥 Firebase 초기화 완료');
+} catch (e) {
+    console.error('❌ Firebase 초기화 실패:', e);
+}
 
 // 관리자 인증 (난독화된 비밀번호)
 const _0x4a8b = ['ZWR1aHJk', 'YXRvYg=='];
 const _0x3c9d = (function() { return atob(_0x4a8b[1]); })();
 let isAdminLoggedIn = false;
 
-// GitHub 저장소에서 직접 데이터 불러오기
-async function loadTeamDataFromGithub() {
-    try {
-        console.log('🌐 GitHub 저장소에서 팀 데이터 불러오는 중...');
-        const response = await fetch(`https://raw.githubusercontent.com/muniv/find_my_jo/main/data.json?t=${Date.now()}`);
+// Firebase에서 실시간 데이터 불러오기
+async function loadTeamDataFromFirebase() {
+    return new Promise((resolve) => {
+        try {
+            console.log('🔥 Firebase에서 팀 데이터 불러오는 중...');
 
-        console.log('📡 GitHub Raw 응답 상태:', response.status);
+            const ref = database.ref('teamData');
+            ref.once('value', (snapshot) => {
+                const data = snapshot.val();
 
-        if (!response.ok) {
-            throw new Error(`GitHub Raw 파일 오류: ${response.status}`);
+                if (data) {
+                    console.log('✅ Firebase에서 팀 데이터 불러오기 성공:', data);
+                    resolve(data);
+                } else {
+                    console.log('ℹ️ Firebase에 데이터 없음. 기본 데이터를 업로드합니다.');
+                    // 기본 데이터를 Firebase에 업로드
+                    ref.set(defaultTeamData).then(() => {
+                        console.log('✅ 기본 데이터 Firebase 업로드 완료');
+                        resolve(defaultTeamData);
+                    });
+                }
+            }, (error) => {
+                console.error('❌ Firebase에서 데이터 로딩 실패:', error);
+                console.log('📱 localStorage 백업 시도...');
+                resolve(loadTeamDataFromLocalStorage());
+            });
+
+            // 실시간 업데이트 리스너
+            ref.on('value', (snapshot) => {
+                const newData = snapshot.val();
+                if (newData && JSON.stringify(newData) !== JSON.stringify(teamData)) {
+                    console.log('🔄 Firebase에서 실시간 데이터 업데이트:', newData);
+                    teamData = newData;
+
+                    // 현재 화면 업데이트
+                    const resultSection = document.getElementById('result');
+                    const notFoundSection = document.getElementById('notFound');
+                    if (!resultSection.classList.contains('hidden') || !notFoundSection.classList.contains('hidden')) {
+                        // 검색 결과가 표시중이라면 다시 검색해서 업데이트
+                        const nameInput = document.getElementById('nameInput');
+                        if (nameInput && nameInput.value.trim()) {
+                            const result = findTeamByName(nameInput.value.trim());
+                            displayResult(result);
+                        }
+                    }
+                }
+            });
+
+        } catch (e) {
+            console.error('❌ Firebase 연결 실패:', e);
+            console.log('📱 localStorage 백업 시도...');
+            resolve(loadTeamDataFromLocalStorage());
         }
-
-        const data = await response.json();
-        console.log('✅ GitHub 저장소에서 팀 데이터 불러오기 성공:', data);
-        return data;
-    } catch (e) {
-        console.error('❌ GitHub 저장소에서 데이터 로딩 실패:', e);
-        console.log('📱 localStorage 백업 시도...');
-        return loadTeamDataFromLocalStorage();
-    }
+    });
 }
 
 // localStorage에서 팀 데이터 불러오기 (백업용)
@@ -64,7 +108,12 @@ function loadTeamDataFromLocalStorage() {
 
 // 메인 데이터 로딩 함수
 async function loadTeamData() {
-    return await loadTeamDataFromGithub();
+    if (database) {
+        return await loadTeamDataFromFirebase();
+    } else {
+        console.log('⚠️ Firebase 연결 실패. localStorage 사용');
+        return loadTeamDataFromLocalStorage();
+    }
 }
 
 // GitHub Gist에 팀 데이터 저장하기
@@ -122,9 +171,35 @@ function saveTeamDataToLocalStorage(data) {
     }
 }
 
+// Firebase에 팀 데이터 저장하기
+async function saveTeamDataToFirebase(data) {
+    try {
+        console.log('🔥 Firebase에 팀 데이터 저장 중...');
+
+        const ref = database.ref('teamData');
+        await ref.set(data);
+
+        console.log('✅ Firebase에 팀 데이터 저장 성공:', data);
+
+        // 백업으로 localStorage에도 저장
+        saveTeamDataToLocalStorage(data);
+
+        return true;
+    } catch (e) {
+        console.error('❌ Firebase 저장 실패:', e);
+        console.log('📱 localStorage 백업 저장 시도...');
+        return saveTeamDataToLocalStorage(data);
+    }
+}
+
 // 메인 저장 함수
 async function saveTeamData(data) {
-    return await saveTeamDataToGist(data);
+    if (database) {
+        return await saveTeamDataToFirebase(data);
+    } else {
+        console.log('⚠️ Firebase 연결 실패. localStorage만 사용');
+        return saveTeamDataToLocalStorage(data);
+    }
 }
 
 // 비밀번호 검증 함수
