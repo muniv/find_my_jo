@@ -1,5 +1,5 @@
-// 팀 데이터 (관리자가 CSV로 업데이트 가능)
-let teamData = {
+// 기본 팀 데이터 (초기값)
+const defaultTeamData = {
     "1조": ["김민수", "이지영", "박철수", "정소희", "최동욱"],
     "2조": ["송하늘", "윤미래", "강바다", "임나무", "오별님"],
     "3조": ["한사랑", "노을빛", "구름이", "달빛이", "햇살이"],
@@ -7,10 +7,35 @@ let teamData = {
     "5조": ["신우주", "문별이", "성하늘", "차바다", "황금빛"]
 };
 
+// localStorage에서 팀 데이터 불러오기 또는 기본값 사용
+let teamData = loadTeamData();
+
 // 관리자 인증 (난독화된 비밀번호)
 const _0x4a8b = ['ZWR1aHJk', 'YXRvYg=='];
 const _0x3c9d = (function() { return atob(_0x4a8b[1]); })();
 let isAdminLoggedIn = false;
+
+// localStorage에서 팀 데이터 불러오기
+function loadTeamData() {
+    try {
+        const saved = localStorage.getItem('teamData');
+        return saved ? JSON.parse(saved) : defaultTeamData;
+    } catch (e) {
+        console.error('팀 데이터 로딩 실패:', e);
+        return defaultTeamData;
+    }
+}
+
+// localStorage에 팀 데이터 저장하기
+function saveTeamData(data) {
+    try {
+        localStorage.setItem('teamData', JSON.stringify(data));
+        return true;
+    } catch (e) {
+        console.error('팀 데이터 저장 실패:', e);
+        return false;
+    }
+}
 
 // 비밀번호 검증 함수
 function verifyPassword(inputPassword) {
@@ -268,7 +293,14 @@ function uploadCSV() {
             
             // 기존 데이터를 새 데이터로 교체
             teamData = newTeamData;
-            
+
+            // localStorage에 저장
+            if (saveTeamData(teamData)) {
+                console.log('팀 데이터가 localStorage에 저장되었습니다.');
+            } else {
+                alert('데이터 저장에 실패했습니다. 브라우저 저장소를 확인해주세요.');
+            }
+
             // 현재 팀 데이터 표시 업데이트
             displayCurrentTeams();
             
