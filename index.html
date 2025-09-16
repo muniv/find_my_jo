@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팀 찾기 - Team Seeker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>팀 찾기</h1>
+            <p>이름을 입력하면 조 정보를 확인할 수 있습니다</p>
+            <button id="adminToggle" class="admin-toggle">관리자</button>
+        </div>
+
+        <div class="search-section">
+            <div class="input-group">
+                <input type="text" id="nameInput" placeholder="이름을 입력하세요" autocomplete="off">
+                <button id="searchBtn">찾기</button>
+            </div>
+        </div>
+
+        <div id="result" class="result-section hidden">
+            <div class="team-card">
+                <div class="team-header">
+                    <h2 id="teamNumber"></h2>
+                    <div class="seat-info">
+                        <span id="seatLocation"></span>
+                    </div>
+                </div>
+                
+                <div class="member-section">
+                    <h3>팀원</h3>
+                    <div id="memberList" class="member-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notFound" class="not-found hidden">
+            <div class="error-card">
+                <h3>찾을 수 없습니다</h3>
+                <p>입력하신 이름을 다시 확인해주세요</p>
+            </div>
+        </div>
+
+        <!-- 관리자 로그인 모달 -->
+        <div id="adminModal" class="modal hidden">
+            <div class="modal-content">
+                <h3>관리자 로그인</h3>
+                <div class="input-group">
+                    <input type="password" id="adminPassword" placeholder="비밀번호를 입력하세요" autocomplete="off">
+                    <button id="adminLoginBtn">로그인</button>
+                </div>
+                <button id="adminCloseBtn" class="close-btn">취소</button>
+            </div>
+        </div>
+
+        <!-- 관리자 패널 -->
+        <div id="adminPanel" class="admin-panel hidden">
+            <div class="admin-content">
+                <div class="admin-header">
+                    <h3>관리자 패널</h3>
+                    <div class="admin-buttons">
+                        <button id="adminBackBtn" class="back-btn">돌아가기</button>
+                        <button id="adminLogoutBtn" class="logout-btn">로그아웃</button>
+                    </div>
+                </div>
+                
+                <div class="upload-section">
+                    <h4>팀 데이터 업로드</h4>
+                    <p class="upload-info">CSV 형식: 조,위치,이름1,이름2,이름3...</p>
+                    <p class="upload-example">예시: 1조,A구역 1-5번 테이블,김민수,이지영,박철수</p>
+                    
+                    <div class="download-section">
+                        <button id="downloadTemplateBtn" class="template-btn">현재 데이터로 CSV 템플릿 다운로드</button>
+                    </div>
+                    
+                    <div class="file-upload">
+                        <input type="file" id="csvFile" accept=".csv" />
+                        <button id="uploadBtn">업로드</button>
+                    </div>
+                    
+                    <div id="uploadResult" class="upload-result hidden"></div>
+                </div>
+
+                <div class="current-data">
+                    <h4>현재 팀 데이터</h4>
+                    <div id="currentTeams" class="teams-display"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
