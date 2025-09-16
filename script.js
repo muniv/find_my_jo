@@ -32,9 +32,15 @@ async function loadTeamDataFromGist() {
 
     try {
         console.log('🌐 GitHub Gist에서 팀 데이터 불러오는 중...');
-        const response = await fetch(`https://api.github.com/gists/${GITHUB_CONFIG.gistId}?t=${Date.now()}`);
+        const response = await fetch(`https://api.github.com/gists/${GITHUB_CONFIG.gistId}?t=${Date.now()}`, {
+            headers: {
+                'Authorization': `token ${GITHUB_CONFIG.token}`
+            }
+        });
 
         console.log('📡 GitHub API 응답 상태:', response.status);
+        console.log('🔑 사용중인 token:', GITHUB_CONFIG.token ? `${GITHUB_CONFIG.token.slice(0,8)}...` : 'undefined');
+
         if (!response.ok) {
             throw new Error(`GitHub API 오류: ${response.status}`);
         }
