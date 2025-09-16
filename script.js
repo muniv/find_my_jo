@@ -10,12 +10,15 @@ const defaultTeamData = {
 // 팀 데이터 초기화 (나중에 loadTeamData()로 설정)
 let teamData;
 
-// Firebase 설정 (무료 실시간 데이터베이스)
+// Firebase 설정 (사용자 전용 실시간 데이터베이스)
 const firebaseConfig = {
-    apiKey: "AIzaSyCqOvWv4bSJoQTWN0x8gkq6z5JH4K2vP9w",
-    authDomain: "team-finder-db.firebaseapp.com",
-    databaseURL: "https://team-finder-db-default-rtdb.firebaseio.com",
-    projectId: "team-finder-db"
+    apiKey: "AIzaSyDK0zBBUmbMHnb_2JO6CjMyDCiYLB8lJLM",
+    authDomain: "find-my-jo.firebaseapp.com",
+    databaseURL: "https://find-my-jo-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "find-my-jo",
+    storageBucket: "find-my-jo.firebasestorage.app",
+    messagingSenderId: "411258893900",
+    appId: "1:411258893900:web:fe4f4ccde7e1f8aac226e9"
 };
 
 // Firebase 초기화
