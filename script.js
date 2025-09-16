@@ -32,21 +32,32 @@ async function loadTeamDataFromGist() {
 
     try {
         console.log('🌐 GitHub Gist에서 팀 데이터 불러오는 중...');
-        const response = await fetch(`https://api.github.com/gists/${GITHUB_CONFIG.gistId}`);
+        const response = await fetch(`https://api.github.com/gists/${GITHUB_CONFIG.gistId}?t=${Date.now()}`, {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
 
+        console.log('📡 GitHub API 응답 상태:', response.status);
         if (!response.ok) {
             throw new Error(`GitHub API 오류: ${response.status}`);
         }
 
         const gist = await response.json();
+        console.log('📝 Gist 원본 응답:', gist);
+
         const fileContent = gist.files[GITHUB_CONFIG.filename];
+        console.log('📄 파일 내용:', fileContent);
 
         if (fileContent && fileContent.content) {
             const data = JSON.parse(fileContent.content);
             console.log('✅ GitHub Gist에서 팀 데이터 불러오기 성공:', data);
+            console.log('🕐 Gist 마지막 업데이트:', gist.updated_at);
             return data;
         } else {
             console.log('ℹ️ Gist에 데이터 없음. 기본 데이터 사용');
+            console.log('📂 사용가능한 파일들:', Object.keys(gist.files));
             return defaultTeamData;
         }
     } catch (e) {
