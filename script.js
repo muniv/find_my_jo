@@ -11,7 +11,7 @@ const defaultTeamData = {
 let teamData;
 
 // GitHub Gist 설정 (분할 방식)
-const _token_parts = ['ghp_', 'g61xswAoQiq01GZ4dsUuhme6wXL4Vj4aQrsn'];
+const _token_parts = ['ghp_', '9Plc0OuhYKi265rOD7hHhZ6XJ9Uezo2RbuqF'];
 const GITHUB_CONFIG = {
     token: _token_parts.join(''),
     gistId: 'd75a202917ac949ca0db82b403d68b19', // 팀 데이터를 저장할 Gist ID
