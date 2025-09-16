@@ -1,25 +1,10 @@
 // 팀 데이터 (관리자가 CSV로 업데이트 가능)
 let teamData = {
-    "1조": {
-        location: "A구역 1-5번 테이블",
-        members: ["김민수", "이지영", "박철수", "정소희", "최동욱"]
-    },
-    "2조": {
-        location: "A구역 6-10번 테이블", 
-        members: ["송하늘", "윤미래", "강바다", "임나무", "오별님"]
-    },
-    "3조": {
-        location: "B구역 1-5번 테이블",
-        members: ["한사랑", "노을빛", "구름이", "달빛이", "햇살이"]
-    },
-    "4조": {
-        location: "B구역 6-10번 테이블",
-        members: ["권도윤", "서예린", "조민호", "배수진", "양태현"]
-    },
-    "5조": {
-        location: "C구역 1-5번 테이블",
-        members: ["신우주", "문별이", "성하늘", "차바다", "황금빛"]
-    }
+    "1조": ["김민수", "이지영", "박철수", "정소희", "최동욱"],
+    "2조": ["송하늘", "윤미래", "강바다", "임나무", "오별님"],
+    "3조": ["한사랑", "노을빛", "구름이", "달빛이", "햇살이"],
+    "4조": ["권도윤", "서예린", "조민호", "배수진", "양태현"],
+    "5조": ["신우주", "문별이", "성하늘", "차바다", "황금빛"]
 };
 
 // 관리자 인증 (난독화된 비밀번호)
@@ -41,12 +26,11 @@ function verifyPassword(inputPassword) {
 
 // 이름으로 팀 찾기 함수
 function findTeamByName(name) {
-    for (const [teamNumber, teamInfo] of Object.entries(teamData)) {
-        if (teamInfo.members.includes(name)) {
+    for (const [teamNumber, members] of Object.entries(teamData)) {
+        if (members.includes(name)) {
             return {
                 teamNumber: teamNumber,
-                location: teamInfo.location,
-                members: teamInfo.members,
+                members: members,
                 currentUser: name
             };
         }
@@ -62,7 +46,6 @@ function displayResult(result) {
     if (result) {
         // 팀 정보 표시
         document.getElementById('teamNumber').textContent = result.teamNumber;
-        document.getElementById('seatLocation').textContent = `📍 ${result.location}`;
         
         // 팀원 목록 표시
         const memberList = document.getElementById('memberList');
@@ -216,15 +199,14 @@ function displayCurrentTeams() {
     const currentTeams = document.getElementById('currentTeams');
     currentTeams.innerHTML = '';
     
-    for (const [teamNumber, teamInfo] of Object.entries(teamData)) {
+    for (const [teamNumber, members] of Object.entries(teamData)) {
         const teamItem = document.createElement('div');
         teamItem.className = 'team-item';
         
         teamItem.innerHTML = `
             <h5>${teamNumber}</h5>
-            <div class="team-location">${teamInfo.location}</div>
             <div class="team-members">
-                ${teamInfo.members.map(member => `<span>${member}</span>`).join('')}
+                ${members.map(member => `<span>${member}</span>`).join('')}
             </div>
         `;
         
@@ -237,11 +219,11 @@ function parseCSV(csvText) {
     const newTeamData = {};
     let startIndex = 0;
     
-    // 첫 번째 줄이 헤더인지 확인 (조, 위치, 조원1... 형태)
+    // 첫 번째 줄이 헤더인지 확인 (조, 조원1... 형태)
     if (lines.length > 0) {
         const firstLine = lines[0].trim();
         const firstParts = firstLine.split(',').map(part => part.trim());
-        if (firstParts[0] === '조' && firstParts[1] === '위치') {
+        if (firstParts[0] === '조' && firstParts[1] === '조원1') {
             startIndex = 1; // 헤더 건너뛰기
         }
     }
@@ -251,22 +233,18 @@ function parseCSV(csvText) {
         if (!line) continue;
         
         const parts = line.split(',').map(part => part.trim());
-        if (parts.length < 3) {
-            throw new Error(`${i + 1}번째 줄: 최소 3개 열이 필요합니다 (조, 위치, 이름1)`);
+        if (parts.length < 2) {
+            throw new Error(`${i + 1}번째 줄: 최소 2개 열이 필요합니다 (조, 이름1)`);
         }
         
         const teamNumber = parts[0];
-        const location = parts[1];
-        const members = parts.slice(2).filter(name => name); // 빈 이름 제거
+        const members = parts.slice(1).filter(name => name); // 빈 이름 제거
         
-        if (!teamNumber || !location || members.length === 0) {
-            throw new Error(`${i + 1}번째 줄: 조명, 위치, 최소 1명의 이름이 필요합니다`);
+        if (!teamNumber || members.length === 0) {
+            throw new Error(`${i + 1}번째 줄: 조명과 최소 1명의 이름이 필요합니다`);
         }
         
-        newTeamData[teamNumber] = {
-            location: location,
-            members: members
-        };
+        newTeamData[teamNumber] = members;
     }
     
     return newTeamData;
@@ -326,12 +304,12 @@ function showUploadResult(message, isSuccess) {
 function downloadCSVTemplate() {
     // 최대 조원 수 계산
     let maxMembers = 0;
-    for (const teamInfo of Object.values(teamData)) {
-        maxMembers = Math.max(maxMembers, teamInfo.members.length);
+    for (const members of Object.values(teamData)) {
+        maxMembers = Math.max(maxMembers, members.length);
     }
     
     // 헤더 생성
-    const headers = ['조', '위치'];
+    const headers = ['조'];
     for (let i = 1; i <= maxMembers; i++) {
         headers.push(`조원${i}`);
     }
@@ -340,11 +318,11 @@ function downloadCSVTemplate() {
     const csvLines = [];
     csvLines.push(headers.join(','));  // 헤더 추가
     
-    for (const [teamNumber, teamInfo] of Object.entries(teamData)) {
-        const line = [teamNumber, teamInfo.location];
+    for (const [teamNumber, members] of Object.entries(teamData)) {
+        const line = [teamNumber];
         // 조원들 추가 (빈 칸은 공백으로 채움)
         for (let i = 0; i < maxMembers; i++) {
-            line.push(teamInfo.members[i] || '');
+            line.push(members[i] || '');
         }
         csvLines.push(line.join(','));
     }
