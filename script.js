@@ -23,46 +23,23 @@ const _0x4a8b = ['ZWR1aHJk', 'YXRvYg=='];
 const _0x3c9d = (function() { return atob(_0x4a8b[1]); })();
 let isAdminLoggedIn = false;
 
-// GitHub Gist에서 팀 데이터 불러오기
-async function loadTeamDataFromGist() {
-    if (!GITHUB_CONFIG.gistId) {
-        console.log('ℹ️ Gist ID 없음. 기본 데이터 사용');
-        return defaultTeamData;
-    }
-
+// GitHub 저장소에서 직접 데이터 불러오기
+async function loadTeamDataFromGithub() {
     try {
-        console.log('🌐 GitHub Gist에서 팀 데이터 불러오는 중...');
-        const response = await fetch(`https://api.github.com/gists/${GITHUB_CONFIG.gistId}?t=${Date.now()}`, {
-            headers: {
-                'Authorization': `token ${GITHUB_CONFIG.token}`
-            }
-        });
+        console.log('🌐 GitHub 저장소에서 팀 데이터 불러오는 중...');
+        const response = await fetch(`https://raw.githubusercontent.com/muniv/find_my_jo/main/data.json?t=${Date.now()}`);
 
-        console.log('📡 GitHub API 응답 상태:', response.status);
-        console.log('🔑 사용중인 token:', GITHUB_CONFIG.token ? `${GITHUB_CONFIG.token.slice(0,8)}...` : 'undefined');
+        console.log('📡 GitHub Raw 응답 상태:', response.status);
 
         if (!response.ok) {
-            throw new Error(`GitHub API 오류: ${response.status}`);
+            throw new Error(`GitHub Raw 파일 오류: ${response.status}`);
         }
 
-        const gist = await response.json();
-        console.log('📝 Gist 원본 응답:', gist);
-
-        const fileContent = gist.files[GITHUB_CONFIG.filename];
-        console.log('📄 파일 내용:', fileContent);
-
-        if (fileContent && fileContent.content) {
-            const data = JSON.parse(fileContent.content);
-            console.log('✅ GitHub Gist에서 팀 데이터 불러오기 성공:', data);
-            console.log('🕐 Gist 마지막 업데이트:', gist.updated_at);
-            return data;
-        } else {
-            console.log('ℹ️ Gist에 데이터 없음. 기본 데이터 사용');
-            console.log('📂 사용가능한 파일들:', Object.keys(gist.files));
-            return defaultTeamData;
-        }
+        const data = await response.json();
+        console.log('✅ GitHub 저장소에서 팀 데이터 불러오기 성공:', data);
+        return data;
     } catch (e) {
-        console.error('❌ GitHub Gist에서 데이터 로딩 실패:', e);
+        console.error('❌ GitHub 저장소에서 데이터 로딩 실패:', e);
         console.log('📱 localStorage 백업 시도...');
         return loadTeamDataFromLocalStorage();
     }
@@ -87,7 +64,7 @@ function loadTeamDataFromLocalStorage() {
 
 // 메인 데이터 로딩 함수
 async function loadTeamData() {
-    return await loadTeamDataFromGist();
+    return await loadTeamDataFromGithub();
 }
 
 // GitHub Gist에 팀 데이터 저장하기
