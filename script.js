@@ -7,8 +7,8 @@ const defaultTeamData = {
     "5조": ["신우주", "문별이", "성하늘", "차바다", "황금빛"]
 };
 
-// localStorage에서 팀 데이터 불러오기 또는 기본값 사용
-let teamData = loadTeamData();
+// 팀 데이터 초기화 (나중에 loadTeamData()로 설정)
+let teamData;
 
 // 관리자 인증 (난독화된 비밀번호)
 const _0x4a8b = ['ZWR1aHJk', 'YXRvYg=='];
@@ -122,6 +122,8 @@ function searchTeam() {
 
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', function() {
+    // 페이지 로드시 팀 데이터 불러오기
+    teamData = loadTeamData();
     const nameInput = document.getElementById('nameInput');
     const searchBtn = document.getElementById('searchBtn');
     
