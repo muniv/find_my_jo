@@ -218,46 +218,100 @@ function verifyPassword(inputPassword) {
 }
 
 // 이름으로 팀 찾기 함수
-function findTeamByName(name) {
-    for (const [teamNumber, members] of Object.entries(teamData)) {
-        if (members.includes(name)) {
-            return {
-                teamNumber: teamNumber,
-                members: members,
-                currentUser: name
-            };
-        }
-    }
-    return null;
+// 이름에서 괄호 앞부분(순수 이름)만 추출
+function extractPureName(fullName) {
+    const match = fullName.match(/^([^(]+)/);
+    return match ? match[1].trim() : fullName.trim();
 }
 
-// 결과 표시 함수
-function displayResult(result) {
+// 이름으로 팀 찾기 (동명이인 지원 - 여러 결과 반환)
+function findTeamsByName(searchName) {
+    const results = [];
+    const searchPureName = extractPureName(searchName);
+
+    for (const [teamNumber, members] of Object.entries(teamData)) {
+        for (const member of members) {
+            const memberPureName = extractPureName(member);
+            // 순수 이름이 일치하면 결과에 추가
+            if (memberPureName === searchPureName) {
+                results.push({
+                    teamNumber: teamNumber,
+                    members: members,
+                    currentUser: member  // 실제 저장된 이름 (팀 정보 포함)
+                });
+            }
+        }
+    }
+    return results.length > 0 ? results : null;
+}
+
+// 결과 표시 함수 (여러 결과 지원)
+function displayResults(results) {
     const resultSection = document.getElementById('result');
     const notFoundSection = document.getElementById('notFound');
-    
-    if (result) {
-        // 팀 정보 표시
-        document.getElementById('teamNumber').textContent = result.teamNumber;
-        
-        // 팀원 목록 표시
+
+    if (results && results.length > 0) {
+        // 여러 결과가 있을 경우 모두 표시
+        const teamNumberEl = document.getElementById('teamNumber');
         const memberList = document.getElementById('memberList');
         memberList.innerHTML = '';
-        
-        result.members.forEach(member => {
-            const memberItem = document.createElement('div');
-            memberItem.className = 'member-item';
-            memberItem.textContent = member;
-            
-            // 현재 사용자 강조
-            if (member === result.currentUser) {
-                memberItem.classList.add('current-user');
-                memberItem.textContent += ' (나)';
-            }
-            
-            memberList.appendChild(memberItem);
-        });
-        
+
+        if (results.length === 1) {
+            // 단일 결과
+            const result = results[0];
+            teamNumberEl.textContent = result.teamNumber;
+
+            result.members.forEach(member => {
+                const memberItem = document.createElement('div');
+                memberItem.className = 'member-item';
+                memberItem.textContent = member;
+
+                if (member === result.currentUser) {
+                    memberItem.classList.add('current-user');
+                    memberItem.textContent += ' (나)';
+                }
+
+                memberList.appendChild(memberItem);
+            });
+        } else {
+            // 동명이인 - 여러 결과
+            teamNumberEl.textContent = `${results.length}명의 동명이인 발견`;
+
+            results.forEach((result, index) => {
+                // 구분선 (첫 번째 제외)
+                if (index > 0) {
+                    const divider = document.createElement('div');
+                    divider.className = 'team-divider';
+                    divider.innerHTML = '<hr>';
+                    memberList.appendChild(divider);
+                }
+
+                // 팀 헤더
+                const teamHeader = document.createElement('div');
+                teamHeader.className = 'team-header';
+                teamHeader.textContent = `📌 ${result.teamNumber}`;
+                teamHeader.style.fontWeight = 'bold';
+                teamHeader.style.marginTop = index > 0 ? '15px' : '0';
+                teamHeader.style.marginBottom = '10px';
+                teamHeader.style.fontSize = '1.1em';
+                memberList.appendChild(teamHeader);
+
+                // 팀원 목록
+                result.members.forEach(member => {
+                    const memberItem = document.createElement('div');
+                    memberItem.className = 'member-item';
+                    memberItem.textContent = member;
+
+                    if (member === result.currentUser) {
+                        memberItem.classList.add('current-user');
+                        memberItem.textContent += ' (나)';
+                    }
+
+                    memberList.appendChild(memberItem);
+                });
+            });
+        }
+
         // 결과 표시, 에러 숨기기
         resultSection.classList.remove('hidden');
         notFoundSection.classList.add('hidden');
@@ -279,8 +333,8 @@ function searchTeam() {
         return;
     }
     
-    const result = findTeamByName(name);
-    displayResult(result);
+    const results = findTeamsByName(name);
+    displayResults(results);
     
     // 입력 필드 포커스 유지
     setTimeout(() => {
