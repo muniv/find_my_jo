@@ -540,7 +540,7 @@ async function uploadCSV() {
             resultSection.classList.add('hidden');
             notFoundSection.classList.add('hidden');
 
-            showUploadResult(`성공적으로 업로드되었습니다. 총 ${Object.keys(newTeamData).length}개 팀이 등록되었습니다.`, true);
+            showUploadResult(`성공적으로 업로드되었습니다. 총 ${Object.keys(newTeamData).length}개 조가 등록되었습니다.`, true);
             fileInput.value = ''; // 파일 입력 초기화
 
         } catch (error) {
@@ -605,7 +605,7 @@ function downloadCSVTemplate() {
     const dateStr = now.getFullYear() + '' + 
                    String(now.getMonth() + 1).padStart(2, '0') + 
                    String(now.getDate()).padStart(2, '0');
-    link.setAttribute('download', `팀데이터_${dateStr}.csv`);
+    link.setAttribute('download', `조데이터_${dateStr}.csv`);
     
     // 다운로드 실행
     link.style.visibility = 'hidden';
